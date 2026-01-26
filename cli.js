@@ -1,8 +1,13 @@
 #!/usr/bin/env node
 
-const program = require('commander');
-const logger = require('./lib/utils/logger');
-const version = require('./package.json').version;
+import { createRequire } from 'node:module';
+import { program } from 'commander';
+import logger from './lib/utils/logger.js'; // Note the .js extension, mandatory in ESM
+
+// ESM doesn't import JSON by default without flags, so we use createRequire
+const require = createRequire(import.meta.url);
+const { version } = require('./package.json');
+
 const errorHandler = function (error) {
     logger.error(error);
     process.exit(1);
@@ -27,12 +32,20 @@ program
     .option('-p, --auth-password <password>', 'Basic authentication password.')
     .option('-d, --debug', 'Enable logging of debugging information.')
     .option('--skip-checkout', 'Do not generate a bundle for checkout.')
-    .action((config) => {
+    .action(async (config) => {
         if (config.debug) {
             logger.level = 5;
         }
 
-        require('./lib/generate')(config).catch(errorHandler);
+        // Dynamic Import: Loads lib/generate.js only when this command is run
+        try {
+            const generateModule = await import('./lib/generate.js');
+            // Support both default export and module.exports compatibility
+            const generate = generateModule.default || generateModule;
+            await generate(config);
+        } catch (error) {
+            errorHandler(error);
+        }
     });
 
 program
@@ -50,14 +63,20 @@ program
         '-m, --minify',
         'Minify bundle using terser irrespective of Magento 2 minification setting'
     )
-    .action(({ config, sourcemap, minify, debug, glob }) => {
+    .action(async ({ config, sourcemap, minify, debug, glob }) => {
         if (debug) {
             logger.level = 5;
         }
 
-        require('./lib/bundle')(config, glob, sourcemap, minify).catch(
-            errorHandler
-        );
+        // Dynamic Import: Loads lib/bundle.js only when this command is run
+        try {
+            const bundleModule = await import('./lib/bundle.js');
+            // Support both default export and module.exports compatibility
+            const bundle = bundleModule.default || bundleModule;
+            await bundle(config, glob, sourcemap, minify);
+        } catch (error) {
+            errorHandler(error);
+        }
     });
 
 program.parse(process.argv);
