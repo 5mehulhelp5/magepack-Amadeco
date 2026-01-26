@@ -5,13 +5,14 @@
     "repository": "https://github.com/magesuite/magepack.git",
     "author": "creativestyle",
     "license": "OSL-2.0",
+    "type": "module",
     "main": "index.js",
     "scripts": {
         "test": "jest"
     },
     "engines": {
         "node": ">=18"
-    },
+    }
     "dependencies": {
         "acorn": "^8.15.0",
         "acorn-walk": "^8.3.4",
