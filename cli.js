@@ -58,6 +58,7 @@ program
         'magepack.config.js'
     )
     .option('-g, --glob <path>', 'Glob pattern of themes to bundle.')
+    .option('-t, --theme <vendor/theme>', 'Bundle only this theme (format: Vendor/Theme).')
     .option('-d, --debug', 'Enable logging of debugging information.')
     .option('-s, --sourcemap', 'Include sourcemaps with generated bundles')
     .option(
@@ -74,6 +75,12 @@ program
             logger.level = 5;
         }
 
+        // Validate theme format early (fail fast)
+        if (options.theme && !/^[^/]+\/[^/]+$/.test(options.theme)) {
+            errorHandler(new Error(`Invalid --theme value "${options.theme}". Expected "Vendor/Theme".`));
+            return;
+        }
+
         // Dynamic Import: Loads lib/bundle.js only when this command is run
         try {
             const bundleModule = await import('./lib/bundle.js');
@@ -85,7 +92,8 @@ program
                 options.glob, 
                 options.sourcemap, 
                 options.minify, 
-                options.minifyStrategy
+                options.minifyStrategy,
+                options.theme
             );
         } catch (error) {
             errorHandler(error);
