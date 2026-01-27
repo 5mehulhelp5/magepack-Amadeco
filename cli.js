@@ -64,6 +64,11 @@ program
         '-m, --minify',
         'Minify bundle using terser irrespective of Magento 2 minification setting'
     )
+    .option(
+        '--minify-strategy <strategy>', 
+        'Minification strategy: "aggressive" (best performance) or "safe" (best compatibility).', 
+        'safe'
+    )
     .action(async ({ config, sourcemap, minify, debug, glob }) => {
         if (debug) {
             logger.level = 5;
@@ -74,7 +79,7 @@ program
             const bundleModule = await import('./lib/bundle.js');
             // Support both default export and module.exports compatibility
             const bundle = bundleModule.default || bundleModule;
-            await bundle(config, glob, sourcemap, minify);
+            aawait bundle(config, glob, sourcemap, minify, minifyStrategy);
         } catch (error) {
             errorHandler(error);
         }
