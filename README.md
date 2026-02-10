@@ -2,6 +2,12 @@
 
 **Modern Frontend Bundling for Magento 2 (Adobe Commerce)**
 
+[![Latest Stable Version](https://img.shields.io/github/v/release/Amadeco/magepack)](https://github.com/Amadeco/magepack/releases)
+[![Magento 2](https://img.shields.io/badge/Magento-2.4.8%2B-brightgreen.svg)](https://business.adobe.com/products/magento/magento-commerce.html)
+[![License](https://img.shields.io/github/license/Amadeco/magepack)](LICENSE)
+
+[SPONSOR: Amadeco](https://www.amadeco.fr)
+
 > ⚠️ **Fork Notice:** This is a fork of the original [magesuite/magepack](https://github.com/magesuite/magepack). It has been completely **rewritten in ESM (ECMAScript Modules)** to support **Node.js 18+** and modern development standards.
 
 Magepack is a high-performance bundling tool designed to replace Magento's default `r.js` optimizer. It solves "dependency hell" and blocking RequireJS chains by using Puppeteer to capture the exact execution order of modules and bundling them into optimized chunks.
