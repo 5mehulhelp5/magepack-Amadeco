@@ -1,6 +1,3 @@
-Here is the updated `README.md` file. It explicitly highlights that this project is a **fork** rewritten in **ESM** for modern Node.js environments, while retaining all the documentation for the new features (SRI, Configurable Selectors) we discussed.
-
-```markdown
 # Magepack (ESM Edition) 🚀
 
 **Modern Frontend Bundling for Magento 2 (Adobe Commerce)**
@@ -139,7 +136,4 @@ Open Software License v. 3.0 (OSL-3.0).
 **Credits:**
 Original concept and implementation by [magesuite](https://github.com/magesuite).
 Forked and maintained by Amadeco.
-
-```
-
 ```
