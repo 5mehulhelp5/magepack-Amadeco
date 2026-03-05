@@ -33,6 +33,8 @@ program
     .option('-d, --debug', 'Enable logging of debugging information.')
     .option('-t, --timeout <seconds>', 'Timeout for browser operations in seconds.', '30')
     .option('--skip-checkout', 'Do not generate a bundle for checkout.')
+    .option('--desktop', 'Use a desktop viewport (1920x1080) to capture desktop-specific scripts.')
+    .option('--mobile', 'Use a mobile viewport (412x732) to capture mobile-specific scripts (default).')
     .action(async (config) => {
         if (config.debug) {
             logger.level = 5;
