@@ -33,7 +33,6 @@ program
     .option('-d, --debug', 'Enable logging of debugging information.')
     .option('-t, --timeout <seconds>', 'Timeout for browser operations in seconds.', '30')
     .option('--skip-checkout', 'Do not generate a bundle for checkout.')
-    .option('--strict', 'Fail the build immediately if a mapped module is missing on the filesystem.')
     .action(async (config) => {
         if (config.debug) {
             logger.level = 5;
@@ -53,28 +52,15 @@ program
 program
     .command('bundle')
     .description('Bundle JavaScript files using given configuration file.')
-    .option(
-        '-c, --config <path>',
-        'Configuration file path.',
-        'magepack.config.js'
-    )
+    .option('-c, --config <path>', 'Configuration file path.', 'magepack.config.js')
     .option('-g, --glob <path>', 'Glob pattern of themes to bundle.')
     .option('-t, --theme <vendor/theme>', 'Bundle only this theme (format: Vendor/Theme).')
     .option('-d, --debug', 'Enable logging of debugging information.')
     .option('-s, --sourcemap', 'Include sourcemaps with generated bundles')
-    .option(
-        '-m, --minify',
-        'Minify bundle using terser irrespective of Magento 2 minification setting'
-    )
-    .option(
-        '--minify-strategy <strategy>', 
-        'Minification strategy: "aggressive" (best performance) or "safe" (best compatibility).', 
-        'safe'
-    )
-    .option(
-        '-f', '--fast-compression', 
-        'Use lower Brotli compression levels to speed up builds (Recommended for staging/dev).'
-    )
+    .option('-m, --minify', 'Minify bundle using terser irrespective of Magento 2 minification setting')
+    .option('--minify-strategy <strategy>', 'Minification strategy: "aggressive" (best performance) or "safe" (best compatibility).', 'safe')
+    .option('--fast-compression', 'Use lower Brotli/Zstd compression levels to speed up builds (Recommended for staging/dev CI/CD).')
+    .option('--strict', 'Fail the build immediately if a mapped module is missing on the filesystem.')
     .action(async (options) => {
         if (options.debug) {
             logger.level = 5;
@@ -92,14 +78,7 @@ program
             // Support both default export and module.exports compatibility
             const bundle = bundleModule.default || bundleModule;
             
-            await bundle(
-                options.config, 
-                options.glob, 
-                options.sourcemap, 
-                options.minify, 
-                options.minifyStrategy,
-                options.theme
-            );
+            await bundle(options);
         } catch (error) {
             errorHandler(error);
         }
