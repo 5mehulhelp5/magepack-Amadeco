@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 This fork has been specifically re-architected to meet the strict requirements of Adobe Commerce (Magento 2.4.8+), with an absolute focus on performance (KISS principle), CI/CD resilience, and advanced static compression.
 
-## [3.1.0] - 2026-03-30
+## [1.3.0] - 2026-03-30
 
 ### ✨ Added
 - **Build-Time Mixin Composition:** Introduced the `mixinComposer.js` service that resolves the fundamental incompatibility between Magepack JS bundling and Magento's `mixins!` RequireJS plugin. When a bundle contains both a mixin target (e.g., `Magento_Swatches/js/swatch-renderer`) and its mixin factories, the composer now produces a single composite AMD module that applies the full mixin chain at RequireJS resolution time — with zero additional HTTP requests and zero reliance on the `require.load()` interception mechanism.
