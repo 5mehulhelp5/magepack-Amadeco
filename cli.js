@@ -40,6 +40,15 @@ program
             logger.level = 5;
         }
 
+        // Support env var fallback for credentials to avoid exposure in `ps aux`.
+        // CLI flags take precedence; env vars are used only when flags are absent.
+        if (!config.authUsername && process.env.MAGEPACK_AUTH_USER) {
+            config.authUsername = process.env.MAGEPACK_AUTH_USER;
+        }
+        if (!config.authPassword && process.env.MAGEPACK_AUTH_PASS) {
+            config.authPassword = process.env.MAGEPACK_AUTH_PASS;
+        }
+
         // Dynamic Import: Loads lib/generate.js only when this command is run
         try {
             const generateModule = await import('./lib/generate.js');
@@ -63,6 +72,7 @@ program
     .option('--minify-strategy <strategy>', 'Minification strategy: "aggressive" (best performance) or "safe" (best compatibility).', 'safe')
     .option('--fast-compression', 'Use lower Brotli/Zstd compression levels to speed up builds (Recommended for staging/dev CI/CD).')
     .option('--strict', 'Fail the build immediately if a mapped module is missing on the filesystem.')
+    .option('--batch-size <number>', 'Number of module files read per I/O batch (default: 50). Increase on systems with high file descriptor limits.', '50')
     .action(async (options) => {
         if (options.debug) {
             logger.level = 5;
