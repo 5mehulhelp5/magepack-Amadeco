@@ -45,6 +45,17 @@ This fork has been specifically re-architected to meet the strict requirements o
 - **Duplicate startup log messages (`lib/generate.js`):** The `logger.info("Starting generation with timeout...")` and `logger.info("Launching Puppeteer browser...")` messages were emitted twice — once at the top of the function (lines 56–58) and again right before `puppeteer.launch()` (lines 92–93). The duplicate block has been removed. Log output is now emitted once, in the correct order.
 - **Dead code removed (`lib/bundle/service/mixinWeaver.js`):** `mixinWeaver.js` implemented an earlier IIFE-based mixin application strategy (v3.1.0 initial prototype) that was superseded by the `define()`-based composition in `mixinComposer.js`. The file exported `weaveMixins` but was never imported anywhere in the codebase. It also contained a correctness trap at line 246: `define(key, function() { return ctx.defined[key]; })` captured `key` (a mutable external reference) instead of closing over the already-computed `__woven__` value — harmless in the IIFE approach since `ctx.defined[key]` was set immediately before, but would silently return a stale value if `ctx.defined[key]` were mutated externally. The file has been deleted. The active mixin pipeline remains `mixinComposer.js` + `mixinResolver.js`.
 
+## [1.4.1] - 2026-04-14
+
+### 🚀 Changed
+- **`--batch-size` bounds validation (`lib/bundle/processor.js`):** Parsed value is now clamped to `[1, 500]`. Values outside that range emit a `consola.warn` and fall back to the default of 50, preventing accidental resource exhaustion from a typo like `--batch-size 99999`.
+- **Missing module log level unified (`lib/bundle/processor.js`):** All missing module entries (JS and text resources) now log at `consola.warn` level. Previously, missing JS modules silently logged at `consola.debug` — invisible to users without `--debug` — while text resources already warned. The distinction had no operational value and caused dropped modules to go unnoticed.
+
+### 🐛 Fixed
+- **Orchestrator block missing `ensureTrailingSemicolon` (`lib/bundle/service/mixinComposer.js`):** The `orchestratorLines.join('\n')` block was not wrapped in `ensureTrailingSemicolon()`, unlike the `renamedTargetContent` and each mixin source. The downstream `processor.js` semicolon loop caught this safely, but the inconsistency was a correctness trap for any future use of `compositeContent` outside that path. Now consistently applied to all `parts` entries.
+- **Broken JSDoc and invisible dead code in `moduleWrapper.js`:** The old `wrapNonAmd` implementation (without the jQuery concurrency race fix) was commented out by embedding it inside a `/** */` JSDoc block. This left the active function at line 74 with no proper JSDoc attached, and made the old code invisible to documentation tooling. Replaced with a standard `/* LEGACY ... */` block comment and restored a complete JSDoc on the active function.
+- **Missing `node:` prefix in `lib/bundle/getLocales.js`:** Normalized `'fs/promises'` and `'path'` imports to `'node:fs/promises'` and `'node:path'`, consistent with all other files in the module.
+
 ## [1.4.0] - 2026-04-14
 
 ### ✨ Added
@@ -60,17 +71,6 @@ This fork has been specifically re-architected to meet the strict requirements o
 - **Mixin ID escaping via `JSON.stringify` (`lib/bundle/service/mixinComposer.js`):** Replaced manual `.replace(/\\/g, '\\\\').replace(/"/g, '\\"')` chains with `JSON.stringify()` for all module ID string literals emitted into generated AMD `define()` calls. The previous approach failed silently on module IDs containing backslashes, Unicode escape sequences, or other characters requiring multi-step escaping. `JSON.stringify` handles all edge cases correctly and is the canonical approach for embedding arbitrary strings in JS source.
 - **Bundle config schema validation (`lib/bundle.js`):** Added per-entry validation of the loaded `magepack.config.js` before any I/O begins. Each bundle is checked for a non-empty `name` string and a plain `modules` object. Provides a clear error message and early exit instead of a cryptic downstream failure deep in the processor.
 - **SRI write verification (`lib/bundle/service/sriUpdater.js`):** After writing the updated `sri-hashes.json`, the file is immediately re-read and `JSON.parse`d to detect partial-write or I/O corruption. A truncated JSON file would be silently accepted by the previous implementation but would cause Magento CSP validation failures at runtime; the verification now surfaces the problem at build time.
-
-## [1.4.1] - 2026-04-14
-
-### 🚀 Changed
-- **`--batch-size` bounds validation (`lib/bundle/processor.js`):** Parsed value is now clamped to `[1, 500]`. Values outside that range emit a `consola.warn` and fall back to the default of 50, preventing accidental resource exhaustion from a typo like `--batch-size 99999`.
-- **Missing module log level unified (`lib/bundle/processor.js`):** All missing module entries (JS and text resources) now log at `consola.warn` level. Previously, missing JS modules silently logged at `consola.debug` — invisible to users without `--debug` — while text resources already warned. The distinction had no operational value and caused dropped modules to go unnoticed.
-
-### 🐛 Fixed
-- **Orchestrator block missing `ensureTrailingSemicolon` (`lib/bundle/service/mixinComposer.js`):** The `orchestratorLines.join('\n')` block was not wrapped in `ensureTrailingSemicolon()`, unlike the `renamedTargetContent` and each mixin source. The downstream `processor.js` semicolon loop caught this safely, but the inconsistency was a correctness trap for any future use of `compositeContent` outside that path. Now consistently applied to all `parts` entries.
-- **Broken JSDoc and invisible dead code in `moduleWrapper.js`:** The old `wrapNonAmd` implementation (without the jQuery concurrency race fix) was commented out by embedding it inside a `/** */` JSDoc block. This left the active function at line 74 with no proper JSDoc attached, and made the old code invisible to documentation tooling. Replaced with a standard `/* LEGACY ... */` block comment and restored a complete JSDoc on the active function.
-- **Missing `node:` prefix in `lib/bundle/getLocales.js`:** Normalized `'fs/promises'` and `'path'` imports to `'node:fs/promises'` and `'node:path'`, consistent with all other files in the module.
 
 ## [1.3.0] - 2026-03-30
 
